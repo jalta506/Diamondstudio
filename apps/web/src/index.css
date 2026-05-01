@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark text-cream font-body;
+  }
+}
+
+@layer components {
+  .input-base {
+    @apply w-full bg-white/[0.04] border border-white/10 text-cream px-4 py-3.5 text-sm
+           tracking-wide focus:outline-none focus:border-gold/40 transition-colors
+           placeholder:text-cream/15;
+  }
+}

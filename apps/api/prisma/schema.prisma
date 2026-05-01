@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  phone     String?
+  address   String?
+  logoUrl   String?
+  timezone  String    @default("America/Costa_Rica")
+  createdAt DateTime  @default(now())
+  barbers   Barber[]
+  bookings  Booking[]
+  admins    Admin[]
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+}
+
+model Barber {
+  id             String          @id @default(cuid())
+  tenantId       String
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+  name           String
+  specialty      String?
+  avatar         String?
+  color          String          @default("#B8860B")
+  active         Boolean         @default(true)
+  serviceType    String          @default("barberia") // "barberia" | "salon"
+  schedule       Schedule[]
+  overrides      ScheduleOverride[]
+  bookings       Booking[]
+  dailySchedules DailySchedule[]
+  createdAt      DateTime        @default(now())
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  barberId  String
+  barber    Barber   @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  slots     String[]
+}
+
+model ScheduleOverride {
+  id       String   @id @default(cuid())
+  barberId String
+  barber   Barber   @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  date     DateTime @db.Date
+  slots    String[]
+  reason   String?
+}
+
+model DailySchedule {
+  id          String    @id @default(cuid())
+  barberId    String
+  barber      Barber    @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  date        DateTime  @db.Date
+  status      String    @default("pending") // "pending" | "confirmed" | "absent"
+  slots       String[]
+  confirmedBy String?
+  confirmedAt DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([barberId, date])
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  barberId    String
+  barber      Barber   @relation(fields: [barberId], references: [id])
+  date        DateTime @db.Date
+  time        String
+  clientName  String
+  clientPhone String
+  status      String   @default("confirmed")
+  notes       String?
+  createdAt   DateTime @default(now())
+  createdBy   String?
+
+  @@unique([barberId, date, time])
+}
