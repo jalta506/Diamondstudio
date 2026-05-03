@@ -26,6 +26,7 @@ export default function AdminBarbers() {
           avatar: data.avatar,
           color: data.color ?? '#D4AF37',
           active: data.active ?? true,
+          serviceType: data.serviceType ?? 'barberia',
         });
         setBarbers((prev) => [...prev, created]);
       }
@@ -192,12 +193,15 @@ function BarberModal({
   const [avatar, setAvatar] = useState(barber?.avatar ?? '✂️');
   const [color, setColor] = useState(barber?.color ?? '#D4AF37');
   const [active, setActive] = useState(barber?.active ?? true);
+  const [serviceType, setServiceType] = useState<'barberia' | 'salon'>(
+    (barber?.serviceType as 'barberia' | 'salon') ?? 'barberia'
+  );
   const [saving, setSaving] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
-    await onSave({ name, specialty: specialty || undefined, avatar, color, active }, barber?.id);
+    await onSave({ name, specialty: specialty || undefined, avatar, color, active, serviceType }, barber?.id);
     setSaving(false);
   }
 
@@ -230,6 +234,27 @@ function BarberModal({
               placeholder="Cortes clásicos, barba…"
               className="input-base"
             />
+          </Field>
+
+          {/* Service type */}
+          <Field label="Tipo de servicio">
+            <div className="flex gap-4">
+              {(['barberia', 'salon'] as const).map((type) => (
+                <label key={type} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="serviceType"
+                    value={type}
+                    checked={serviceType === type}
+                    onChange={() => setServiceType(type)}
+                    className="accent-gold"
+                  />
+                  <span className="text-cream/70 text-sm capitalize">
+                    {type === 'barberia' ? 'Barbería' : 'Salón'}
+                  </span>
+                </label>
+              ))}
+            </div>
           </Field>
 
           {/* Avatar */}
